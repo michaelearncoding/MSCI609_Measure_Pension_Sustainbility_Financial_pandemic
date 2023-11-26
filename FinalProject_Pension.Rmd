@@ -1,0 +1,828 @@
+---
+title: "FinalProject_Pension_modelling_updated"
+author: "Michael(Qingda) Mai"
+date: "2023-11-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{R Boxplot_Pension_by_Different_Groups}
+library(data.table)
+data_frame_clean <-read.table(file="Obligation_data_with_industry_V2.csv", header=TRUE, sep=",")
+
+library(reshape2)
+data_m <- melt(data_frame_clean[ , c(10,36)])
+head(data_m)
+# variable and value is the column name of the melted matrix ，internal variables, variable represent the category of the line，value represent the Projected Benific Pension
+p <- ggplot(data_m, aes(x=GIC.Groups, y=value),color=variable) + 
+geom_boxplot() + 
+theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = .5)) +
+theme(legend.position="none")
+p
+
+```
+
+
+```{r Output_the_full_name_of_Columns}
+#data <- read.csv("Obligation_data_with_industry_V2.csv", check.names = FALSE)
+#colnames(data)
+#data <- read.csv("Obligation_data_with_industry_V2.csv")
+#colnames(data)
+```
+
+```{R check_data}
+#library(reshape2)
+#data <- read.csv("Obligation_data_with_industry_V2.csv")
+#data_m <- data[ , c(6,10,36)]
+#data[,c('Pension.Employer.Contribution','Pension...Projected.Benefit.Obligation')]
+```
+
+```{r Scatterplot_Pension_by_Service_Cost}
+library(ggplot2)
+library(reshape2)
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+colnames(data)
+data_m <- data[ , c(6,10,36,7,18)]
+colnames(data_m)
+ggplot(data_m, aes(x = Pension.Plans...Service.Cost, 
+                   y =Pension...Projected.Benefit.Obligation), 
+       color = GIC.Groups) + geom_point(size = 2.0, shape = 16) + facet_wrap( ~ GIC.Groups)+ theme(axis.text.x = element_text(size = 7, angle = 45, hjust = 1))+ labs(y = "Projected Benefit Obligation", x = "Service Cost")
+
+```
+
+```{R scatter_plot_PBO_By_Employer_}
+library(ggplot2)
+library(reshape2)
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+colnames(data)
+data_m <- data[ , c(6,10,36,7,18)]
+colnames(data_m)
+
+p <- ggplot(
+  data = data_m,
+  mapping = aes(
+    x = Employer.Contributions...Expected.Next.Year,
+    y = Pension...Projected.Benefit.Obligation))
+p + geom_point(alpha = 0.4, size = 4)+ labs(y = "Projected Benefit Obligation", x = "Expected Employer Contributions")+
+    geom_smooth(method = "lm", se = FALSE, color = "red")
+
+```
+
+
+```{R scatter_plot_PBO_By_Service_Cost}
+library(ggplot2)
+library(reshape2)
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+colnames(data)
+data_m <- data[ , c(6,10,36,7,18)]
+colnames(data_m)
+
+p <- ggplot(
+  data = data_m,
+  mapping = aes(
+    x = Pension.Plans...Service.Cost,
+    y = Pension...Projected.Benefit.Obligation))
+p + geom_point(alpha = 0.4, size = 4)+ labs(y = "Projected Benefit Obligation", x = "Service Cost")+
+    geom_smooth(method = "lm", se = FALSE, color = "red")
+
+```
+
+
+```{R}
+library(ggplot2)
+library(reshape2)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 7, 18, 11, 17, 26, 30, 32)]
+
+# 修改列名
+colnames(data_m
+         ) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                "EmployerContributionNextYear",
+                  "ServiceCost","InterestCost",
+                "ReturnOnPlanAssets(Expected)",
+                "LongTermLiability",
+                "BenefitsPaid",
+                "PriorService")
+
+# Reshape the data for easier plotting
+data_m_long <- melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+# Create scatter plots for each variable against "Projected Benefit Obligation"
+p <- ggplot(data_m_long, aes(x = value, y = Pension...Projected.Benefit.Obligation)) +
+  geom_point(alpha = 0.4, size = 4) +
+  labs(y = "Projected Benefit Obligation") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  facet_wrap(~variable, scales = "free")
+
+# Display the plots
+print(p)
+
+
+```
+```{R wrong method}
+
+library(data.table)
+data_frame_clean <-read.table(file="Obligation_data_with_industry_V2.csv", header=TRUE, sep=",")
+library(reshape2)
+data_m <- data_frame_clean[ , c(10,36,37)]
+colnames(data_m)
+
+#ggplot(data_m, aes(x=GIC.Groups, y=Pension...Projected.Benefit.Obligation)) + 
+#  geom_bar(stat="identity", position="dodge")
+
+
+ggplot(data_m, aes(x = GIC.Groups, 
+                   y = Pension...Projected.Benefit.Obligation, 
+                   fill = factor(year))) + geom_col(position = "dodge")+geom_bar(stat ="identity", width=0.5, position= "dodge") + theme(axis.text.x = element_text(angle = 45, hjust = 1))+ labs(y = "Projected Benefit Obligation",x = "GIC Group - Industries")
+```
+
+
+```{R TimeSeries_Analysis_Histograme}
+library(data.table)
+data_frame_clean <-read.table(file="Obligation_data_with_industry_V2.csv", header=TRUE, sep=",")
+library(reshape2)
+data_m <- data_frame_clean[ , c(10,36,37)]
+colnames(data_m)
+
+ggplot(data_m, aes(x = GIC.Groups, 
+                   y = Pension...Projected.Benefit.Obligation, 
+                   fill = factor(year))) + 
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  labs(y = "Projected Benefit Obligation", x = "GIC Group - Industries")
+
+```
+
+```{R Normalality test}
+library(ggplot2)
+library(reshape2)
+
+
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 7, 18, 11, 17, 26, 30, 32)]
+
+# 修改列名
+colnames(data_m
+         ) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                "EmployerContributionNextYear",
+                  "ServiceCost","InterestCost",
+                "ReturnOnPlanAssets(Expected)",
+                "LongTermLiability",
+                "BenefitsPaid",
+                "PriorService")
+
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+sapply(data_m[,2:9],shapiro.test)
+
+
+
+```
+```{R apply the Kolmogorov-Smirnov test (ks.test) to each variable }
+library(ggplot2)
+library(reshape2)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 7, 18, 11, 17, 26, 30, 32)]
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "EmployerContributionNextYear",
+                      "ServiceCost","InterestCost",
+                      "ReturnOnPlanAssets(Expected)",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "PriorService")
+
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+# Perform Kolmogorov-Smirnov Tests for normality on each variable
+normality_tests <- lapply(data_m[, -2], function(x) ks.test(x, "pnorm"))
+
+# Display the results
+names(normality_tests) <- colnames(data_m)[-2]  # Assign variable names to the test results
+normality_tests
+
+```
+
+Write R script: Take the normal distribution test of multi-packet data as an example
+https://blog.csdn.net/yanlingbin/article/details/81194134
+
+Kolmogorov-Smirnov test (K-S test）
+https://zhuanlan.zhihu.com/p/292678346
+
+```{R}
+library(ggplot2)
+library(reshape2)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 7, 18, 11, 17, 26, 30, 32,36)]
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "EmployerContributionNextYear",
+                      "ServiceCost","InterestCost",
+                      "ReturnOnPlanAssets(Expected)",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "PriorService",
+                      "GCI_Group")
+
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+Anova_fit<-aov(Pension...Projected.Benefit.Obligation~GCI_Group,data = data_m)
+summary(Anova_fit)
+
+```
+
+The Anova analysis shows that the difference of Pension is  significant (P<0.001)within different GCI Group.
+
+
+Y: Pension - Projected Benefit Obligation
+X1:Pension Plans - Interest Cost
+X2:Pension Plans - Return on Plan Assets (Expected)
+X3: Pension Employer Contribution
+X4: Postretirement - Long-Term Liability
+X5：Postretirement Benefits Paid
+
+
+```{R multicollinearity Dection - using VIF-variance inflation factor}
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets(Expected)",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+model1 <- lm(Pension...Projected.Benefit.Obligation ~ . - GCI_Group, data = data_m)
+car::vif(model1)
+
+```
+https://zhuanlan.zhihu.com/p/178094445
+Lecture 37 R - Multiple Covariance and Variance Inflation Factors in Multiple Linear Regression
+
+https://bookdown.org/wangminjie/R4DS/tidystats-lm.html#%E5%81%B7%E6%87%92%E7%9A%84%E5%86%99%E6%B3%95
+
+```{R determine if heteroscedasticity is present - Perform a Breusch-Pagan Test.}
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets(Expected)",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+model1 <- lm(Pension...Projected.Benefit.Obligation ~ . - GCI_Group, data = data_m)
+#car::vif(model1)
+# Perform residual plot
+residuals <- residuals(model1)
+fitted_values <- fitted(model1)
+
+# Plot residuals against fitted values
+plot_data <- data.frame(Fitted = fitted_values, Residuals = residuals)
+ggplot(plot_data, aes(x = Fitted, y = Residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residuals vs. Fitted Values", x = "Fitted Values", y = "Residuals")
+
+# Perform Breusch-Pagan test for heteroscedasticity
+bptest_result <- bptest(model1)
+cat("Breusch-Pagan Test for Heteroscedasticity:\n")
+print(bptest_result)
+
+```
+
+The test statistic is 1473.3 and the corresponding p-value is 0.0000. Since the p-value is less than 0.05, we reject the null hypothesis. We do have sufficient evidence to say that heteroscedasticity is present in the regression model.
+
+Reference:
+https://www.statology.org/breusch-pagan-test-r/
+How to Perform a Breusch-Pagan Test in R
+
+Linear Regression: Heteroskedasticity Detection and Its Treatment
+https://blog.csdn.net/yeshang_lady/article/details/125023888
+
+
+```{R Fixed Effect Model}
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36,37)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+
+
+# Install and load the 'plm' package
+#install.packages("plm")
+library(plm)
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+# Build fixed effects model with robust standard errors
+fixed_model <- plm(Pension...Projected.Benefit.Obligation ~ EmployerContribution + InterestCost +ReturnOnPlanAssets_Expected + LongTermLiability + BenefitsPaid,
+                   data = data_m,
+                   index = c("GCI_Group", "Year"),
+                   model = "within",  # Fixed effects model
+                   effect = "twoways",  # Individual and time fixed effects
+                   robust = TRUE)  # Robust standard errors
+# Display fixed effects model summary
+summary(fixed_model)
+
+```
+
+```{R}
+# Install and load necessary packages
+#install.packages(c("plm", "glmnet", "cvms"))
+```
+
+```{R Fixed Effect Model Validation}
+library(plm)
+library(glmnet)
+library(cvms)
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36,37)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+# Build fixed effects model with robust standard errors
+fixed_model <- plm(Pension...Projected.Benefit.Obligation ~ EmployerContribution + InterestCost +
+                     ReturnOnPlanAssets_Expected + LongTermLiability + BenefitsPaid,
+                   data = data_m,
+                   index = c("GCI_Group", "Year"),
+                   model = "within",  # Fixed effects model
+                   effect = "twoways",  # Individual and time fixed effects
+                   robust = TRUE)  # Robust standard errors
+
+# Obtain residuals from the fixed effects model
+residuals_fixed <- resid(fixed_model)
+
+
+# Scatter plot of residuals against fitted values
+plot_data <- data.frame(Fitted = fitted(fixed_model), Residuals = residuals_fixed)
+
+ggplot(plot_data, aes(x = Fitted, y = Residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residuals vs. Fitted Values", x = "Fitted Values", y = "Residuals")
+
+# Perform Breusch-Pagan test for heteroscedasticity
+bptest_result <- bptest(fixed_model)
+cat("Breusch-Pagan Test for Heteroscedasticity:\n")
+print(bptest_result)
+
+
+# Display fixed effects model summary
+print(summary(fixed_model))
+
+```
+
+
+
+
+```{R}
+
+library(plm)
+library(glmnet)
+library(cvms)
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36,37,34)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year",
+                      "GlobaCompanyName")
+
+
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+
+hist(x=data_m$Pension...Projected.Benefit.Obligation)
+
+
+
+# Build fixed effects model with robust standard errors
+fixed_model <- plm(Pension...Projected.Benefit.Obligation ~ EmployerContribution + InterestCost +
+                     ReturnOnPlanAssets_Expected + LongTermLiability + BenefitsPaid,
+                   data = data_m,
+                   index = c("GCI_Group", "Year"),
+                   model = "within",  # Fixed effects model
+                   effect = "twoways",  # Individual and time fixed effects
+                   robust = TRUE,# Robust standard errors
+                   distribution = "cauchy") 
+
+# Obtain residuals from the fixed effects model
+residuals_fixed <- resid(fixed_model)
+fixed_model
+# Scatter plot of residuals against fitted values
+plot_data <- data.frame(Fitted = fitted(fixed_model), Residuals = residuals_fixed)
+
+ggplot(plot_data, aes(x = Fitted, y = Residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residuals vs. Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_bw()
+
+# Plot distribution of Y variable
+ggplot(data_m, aes(x = Pension...Projected.Benefit.Obligation)) +
+  geom_histogram(binwidth = 1000, fill = "steelblue", color = "black") +
+  geom_density()+
+  labs(title = "Distribution of Y Variable",
+       x = "Pension...Projected.Benefit.Obligation",
+       y = "Count") +
+  theme_bw()
+
+
+# VIF test
+#library(car)
+#vif(fixed_model)
+
+# Correlation table
+library(corrplot)
+correlations <- cor(data_m[, c("Pension...Projected.Benefit.Obligation", "EmployerContribution", "InterestCost", "ReturnOnPlanAssets_Expected", "LongTermLiability", "BenefitsPaid")])
+corrplot(correlations, method = "circle")
+
+
+```
+
+```{R}
+# Load the required packages
+library(tidyverse)
+library(car)
+
+# Build the regression model
+model <- lm(Pension...Projected.Benefit.Obligation ~ EmployerContribution + InterestCost +
+              ReturnOnPlanAssets_Expected + LongTermLiability + BenefitsPaid,
+            data = data_m)
+
+# Calculate VIF
+1/vif(model)
+
+vif(model)
+mean(vif(model))
+```
+
+
+```{R}
+# Correlation table
+library(corrplot)
+correlations <- cor(data_m[, c("Pension...Projected.Benefit.Obligation", "EmployerContribution", "InterestCost", "ReturnOnPlanAssets_Expected", "LongTermLiability", "BenefitsPaid")])
+corrplot(correlations, method = "circle")
+
+```
+
+```{R}
+
+summary(fixed_model)
+
+```
+
+
+
+```{R}
+
+
+library(plm)
+library(glmnet)
+library(cvms)
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36,37)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+ggplot(data_m, aes(x=Pension...Projected.Benefit.Obligation)) +
+  geom_histogram() +
+  geom_density() +
+  labs(title="Pension...Projected.Benefit.Obligation Distribution with Density Curve", x="Pension...Projected.Benefit.Obligation", y="Frequency")
+
+
+
+
+```
+
+
+
+
+
+```{R}
+summary(fixed_model)
+```
+
+
+
+
+
+```{R model result visualize}
+library(plm)
+library(glmnet)
+library(cvms)
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30,36,37)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+
+ggplot(data_m, aes(x = EmployerContribution, y = Pension...Projected.Benefit.Obligation, colour = GCI_Group)) +
+  geom_point(alpha = .5)+  geom_smooth(method = "lm", se = FALSE)+
+    labs(y = "PBO values") +  # Modify the y-axis label+
+  theme(
+    legend.text = element_text(size = 5),  # Adjust legend label size
+    legend.title = element_blank(),  # Remove legend title
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),  # Rotate x-axis labels
+    plot.title = element_text(size = 16),  # Adjust plot title size
+    plot.margin = margin(1, 1, 1, 1, "cm")  # Adjust plot margins
+  )
+
+
+
+```
+
+```{R}
+
+# Install and load necessary packages
+#install.packages(c("plm", "glmnet", "cvms"))
+library(plm)
+library(glmnet)
+library(cvms)
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(reshape2)
+#load lmtest library
+library(lmtest)
+
+# Read the data sources
+data <- read.csv("Obligation_data_with_industry_V2.csv")
+
+# Select the columns you want for the scatter plots
+data_m <- data[, c(6, 10, 11, 17, 26, 30, 36, 37)]
+# 7 -> "EmployerContributionNextYear",
+# , 18 -> "ServiceCost"
+# 32 ->   "PriorService"
+
+# Modify column names
+colnames(data_m) <- c("EmployerContribution", "Pension...Projected.Benefit.Obligation",
+                      "InterestCost",
+                      "ReturnOnPlanAssets_Expected",
+                      "LongTermLiability",
+                      "BenefitsPaid",
+                      "GCI_Group",
+                      "Year")
+# Reshape the data for easier plotting
+data_m_long <- reshape2::melt(data_m, id.vars = "Pension...Projected.Benefit.Obligation")
+
+# Convert 'Year' to a factor variable for fixed effects
+data_m$Year <- as.factor(data_m$Year)
+
+# Create a larger plot with smaller legend labels and modified y-axis label
+ggplot(data_m, aes(x = EmployerContribution, y = Pension...Projected.Benefit.Obligation)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(y = "PBO values") +  # Modify the y-axis label
+  theme(
+    legend.text = element_text(size = 5),  # Adjust legend label size
+    legend.title = element_blank(),  # Remove legend title
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),  # Rotate x-axis labels
+    plot.title = element_text(size = 16),  # Adjust plot title size
+    plot.margin = margin(1, 1, 1, 1, "cm")  # Adjust plot margins
+  )
+
+
+
+```
+
+
+
+
+```{R Validation with Lasso}
+
+# Prepare data for LASSO regression
+X <- model.matrix(Pension...Projected.Benefit.Obligation ~ EmployerContribution + InterestCost +
+                    ReturnOnPlanAssets_Expected + LongTermLiability + BenefitsPaid,
+                  data = data_m)[, -1]
+Y <- data_m$Pension...Projected.Benefit.Obligation
+
+# Perform LASSO linear regression with cross-validated parameter selection
+lasso_model <- cv.glmnet(X, Y, alpha = 1,nfolds = 10, nlambda=100)  # alpha = 1 for LASSO
+lasso_model
+# plot best lambda curve及1个标准差线
+plot(lasso_model$glmnet.fit, xvar = "lambda", label = TRUE)
+
+
+best_lambda <- lasso_model$lambda.min  # Select the lambda with the minimum cross-validated error
+
+# Fit the LASSO model with the best lambda
+lasso_model_final <- glmnet(X, Y, alpha = 1, lambda = best_lambda)
+
+# Display LASSO model summary
+summary(lasso_model_final)
+
+# Extract coefficients and plot the feature selection
+lasso_coef <- coef(lasso_model_final)
+lasso_coef
+lasso_model_final$call
+```
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+?cv.glmnet
+lasso_model_final$lambda
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
